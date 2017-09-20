@@ -21,13 +21,14 @@
  */
 
 import UIKit
-import AlamoFire
+import Alamofire
 
 public class PickFlavorViewController: UIViewController {
 
   // MARK: - Instance Properties
   public var flavors: [Flavor] = []
   fileprivate let flavorFactory = FlavorFactory()
+  private let iceCreamUrl: String = "https://www.raywenderlich.com/downloads/Flavors.plist"
 
   // MARK: - Outlets
   @IBOutlet var contentView: UIView!
@@ -43,7 +44,27 @@ public class PickFlavorViewController: UIViewController {
   }
 
   fileprivate func loadFlavors() {
-    // TO-DO: Implement this
+    Alamofire.request(
+      iceCreamUrl,
+      encoding: PropertyListEncoding(format: .xml, options: 0)
+    ).responsePropertyList {
+      [weak self] response in
+      
+      // if this closure executes establish a strong reference to self
+      guard let strongSelf = self else {
+        return
+      }
+  
+      // check if response is successful and has a flavorDictArray
+      guard response.result.isSuccess,
+        let flavorDictArray = response.result.value as? [[String: String]] else {
+          return
+      }
+      
+      strongSelf.flavors = strongSelf.flavorFactory.flavors(from: flavorDictArray)
+      strongSelf.collectionView.reloadData()
+      strongSelf.selectFirstFlavor()
+    }
   }
 
   fileprivate func selectFirstFlavor() {
