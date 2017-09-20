@@ -22,6 +22,7 @@
 
 import UIKit
 import Alamofire
+import MBProgressHUD
 
 public class PickFlavorViewController: UIViewController {
 
@@ -44,6 +45,7 @@ public class PickFlavorViewController: UIViewController {
   }
 
   fileprivate func loadFlavors() {
+    showLoadingProgressUI()
     Alamofire.request(
       iceCreamUrl,
       encoding: PropertyListEncoding(format: .xml, options: 0)
@@ -64,7 +66,16 @@ public class PickFlavorViewController: UIViewController {
       strongSelf.flavors = strongSelf.flavorFactory.flavors(from: flavorDictArray)
       strongSelf.collectionView.reloadData()
       strongSelf.selectFirstFlavor()
+      strongSelf.hideLoadingProgressUI()
     }
+  }
+  
+  private func showLoadingProgressUI(){
+    MBProgressHUD.showAdded(to: contentView, animated: true)
+  }
+  
+  private func hideLoadingProgressUI() {
+    MBProgressHUD.hide(for: contentView, animated: true)
   }
 
   fileprivate func selectFirstFlavor() {
